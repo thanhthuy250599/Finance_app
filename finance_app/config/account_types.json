@@ -1,0 +1,39 @@
+{
+  "free": {
+    "name": "Free",
+    "price_vnd": 0,
+    "ai_daily": 0,
+    "ai_monthly": 5,
+    "voice_monthly": 0,
+    "features": ["basic_charts", "one_ai_report_per_month", "pdf_watermark", "donate_support"]
+  },
+  "pro_basic": {
+    "name": "Pro Basic",
+    "price_vnd": 79000,
+    "ai_daily": 10,
+    "ai_monthly": 150,
+    "voice_monthly": 0,
+    "features": ["advanced_charts", "no_watermark", "email_support_24h", "backup_30d", "basic_trend"]
+  },
+  "pro_plus": {
+    "name": "Pro Plus",
+    "price_vnd": 159000,
+    "ai_daily": 25,
+    "ai_monthly": 400,
+    "voice_monthly": 60,
+    "features": ["smart_analysis", "priority_support", "unlimited_backup", "multi_month_compare", "webhook"]
+  },
+  "enterprise": {
+    "name": "Enterprise",
+    "price_vnd": 399000,
+    "ai_daily": -1,
+    "ai_monthly": -1,
+    "voice_monthly": -1,
+    "features": ["ai_unlimited", "voice_unlimited", "white_label", "dedicated_support", "custom_integrations", "advanced_analytics", "multi_user_teams"]
+  }
+}
+
+
+
+
+

@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+{% block title %}Chi tiêu{% endblock %}
+{% block content %}
+<style>
+  .expenses-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .page-subtitle {
+    color: #4a5568;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .form-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .form-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+  }
+
+  .form-input {
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-select {
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    cursor: pointer;
+  }
+
+  .form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(52, 152, 219, 0.4);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    color: #4a5568;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .expenses-list {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .list-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+  }
+
+  .expense-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .expense-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .expense-category {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+  }
+
+  .expense-note {
+    color: #4a5568;
+    font-size: 0.9rem;
+  }
+
+  .expense-date {
+    color: #718096;
+    font-size: 0.85rem;
+  }
+
+  .expense-amount {
+    font-weight: 700;
+    color: #e53e3e;
+    font-size: 1.3rem;
+  }
+
+  .expense-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-delete {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-delete:hover {
+    background: #c53030;
+    transform: translateY(-1px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #4a5568;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2d3748;
+  }
+
+  .empty-text {
+    font-size: 1rem;
+    color: #718096;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 24px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .form-card {
+      padding: 24px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      justify-content: center;
+    }
+
+    .expenses-list {
+      padding: 24px;
+    }
+
+    .expense-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .expense-actions {
+      align-self: flex-end;
+    }
+  }
+</style>
+
+<div class="expenses-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-credit-card"></i>
+      Quản lý chi tiêu
+    </h1>
+    <p class="page-subtitle">Theo dõi và quản lý chi tiêu hàng ngày một cách thông minh</p>
+  </div>
+  
+  <!-- Form thêm chi tiêu -->
+  <div class="form-card">
+    <h2 class="form-title">
+      <i class="fas fa-plus-circle"></i>
+      Thêm chi tiêu mới
+    </h2>
+    <form id="expense-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Ngày chi tiêu</label>
+          <input type="date" name="date" required class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục</label>
+          <select name="category" required class="form-select">
+            <option value="">Chọn danh mục</option>
+            <option value="Ăn uống">🍽️ Ăn uống</option>
+            <option value="Di chuyển">🚗 Di chuyển</option>
+            <option value="Mua sắm">🛍️ Mua sắm</option>
+            <option value="Giải trí">🎮 Giải trí</option>
+            <option value="Y tế">🏥 Y tế</option>
+            <option value="Học tập">📚 Học tập</option>
+            <option value="Khác">📦 Khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Số tiền (VNĐ)</label>
+          <input type="number" name="amount" placeholder="Nhập số tiền" min="0" step="1000" required class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ghi chú</label>
+          <input type="text" name="note" placeholder="Mô tả chi tiêu" class="form-input" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-plus"></i>
+          Thêm chi tiêu
+        </button>
+        <button type="button" id="voice-btn" class="btn-secondary">
+          <i id="voice-icon" class="fas fa-microphone"></i>
+          <span id="voice-text">Ghi âm</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Thống kê nhanh -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="total-amount">0</div>
+      <div class="stat-label">Tổng chi tiêu</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="expense-count">0</div>
+      <div class="stat-label">Số giao dịch</div>
+    </div>
+  </div>
+
+  <!-- Danh sách chi tiêu -->
+  <div class="expenses-list">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 class="list-title">
+        <i class="fas fa-list"></i>
+        Chi tiêu gần đây
+      </h2>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="exportExpenses('csv')" class="btn-secondary">
+          <i class="fas fa-file-csv"></i>
+          Xuất CSV
+        </button>
+        <button onclick="exportExpenses('pdf')" class="btn-primary">
+          <i class="fas fa-file-pdf"></i>
+          Xuất PDF
+        </button>
+      </div>
+    </div>
+    <div id="expense-list">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="empty-title">Đang tải...</div>
+        <div class="empty-text">Vui lòng chờ trong giây lát</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/main.js"></script>
+<script>
+async function loadExpenses(){
+  try {
+    const r = await fetch('/finance/expenses');
+    const data = await r.json();
+    const container = document.getElementById('expense-list');
+    container.innerHTML = '';
+    
+    if (data.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Chưa có chi tiêu nào</div>';
+      document.getElementById('total-amount').textContent = '0';
+      document.getElementById('expense-count').textContent = '0';
+      return;
+    }
+    
+    // Tính tổng
+    const total = data.reduce((sum, x) => sum + (x.amount || 0), 0);
+    document.getElementById('total-amount').textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+    document.getElementById('expense-count').textContent = data.length;
+    
+    // Hiển thị danh sách
+    data.forEach((x, idx)=>{
+      const div = document.createElement('div');
+      div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #dee2e6;';
+      div.innerHTML = `
+        <div style="flex: 1;">
+          <div style="font-weight: bold; color: #333;">${x.category}</div>
+          <div style="color: #666; font-size: 14px;">${x.date} ${x.note ? ' - ' + x.note : ''}</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-weight: bold; color: #dc3545; font-size: 18px;">${(x.amount || 0).toLocaleString('vi-VN')} VNĐ</div>
+          <button data-idx="${idx}" class="del" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Xóa</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    console.error('Error loading expenses:', error);
+    document.getElementById('expense-list').innerHTML = '<div style="padding: 40px; text-align: center; color: #dc3545;">Lỗi tải dữ liệu</div>';
+  }
+}
+
+async function exportExpenses(format) {
+  try {
+    const response = await fetch(`/finance/expenses/export?format=${format}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `expenses_${new Date().toISOString().slice(0,7)}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } else {
+      alert('Lỗi xuất file');
+    }
+  } catch (error) {
+    console.error('Export error:', error);
+    alert('Lỗi xuất file');
+  }
+}
+
+// Voice input functionality
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+document.getElementById('voice-btn').addEventListener('click', async () => {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        await processVoiceInput(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      isRecording = true;
+      updateVoiceButton();
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('Không thể truy cập microphone. Vui lòng kiểm tra quyền truy cập.');
+    }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    updateVoiceButton();
+  }
+});
+
+function updateVoiceButton() {
+  const icon = document.getElementById('voice-icon');
+  const text = document.getElementById('voice-text');
+  const btn = document.getElementById('voice-btn');
+  
+  if (isRecording) {
+    icon.textContent = '⏹️';
+    text.textContent = 'Dừng ghi';
+    btn.style.background = '#dc3545';
+  } else {
+    icon.textContent = '🎤';
+    text.textContent = 'Ghi âm';
+    btn.style.background = '#28a745';
+  }
+}
+
+async function processVoiceInput(audioBlob) {
+  try {
+    // Check voice quota first
+    const response = await fetch('/ai/voice', {
+      method: 'POST',
+      body: audioBlob,
+      headers: { 'Content-Type': 'audio/wav' }
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok && result.text) {
+      // Parse the transcribed text and fill the form
+      const text = result.text.toLowerCase();
+      
+      // Extract amount (look for numbers followed by k or full numbers)
+      const amountMatch = text.match(/(\d+)(?:k|000)?/);
+      if (amountMatch) {
+        let amount = parseInt(amountMatch[1]);
+        if (text.includes('k') && amount < 1000) {
+          amount *= 1000;
+        }
+        document.querySelector('input[name="amount"]').value = amount;
+      }
+      
+      // Extract category based on keywords
+      let category = 'Khác';
+      if (text.includes('ăn') || text.includes('cơm') || text.includes('trà') || text.includes('nước')) {
+        category = 'Ăn uống';
+      } else if (text.includes('mua') || text.includes('áo') || text.includes('quần')) {
+        category = 'Mua sắm';
+      } else if (text.includes('xăng') || text.includes('xe') || text.includes('taxi')) {
+        category = 'Di chuyển';
+      } else if (text.includes('phim') || text.includes('game') || text.includes('giải trí')) {
+        category = 'Giải trí';
+      } else if (text.includes('thuốc') || text.includes('bệnh viện') || text.includes('y tế')) {
+        category = 'Y tế';
+      } else if (text.includes('học') || text.includes('sách') || text.includes('trường')) {
+        category = 'Học tập';
+      }
+      
+      document.querySelector('select[name="category"]').value = category;
+      
+      // Set note as the transcribed text
+      document.querySelector('input[name="note"]').value = result.text;
+      
+      // Set today's date
+      document.querySelector('input[name="date"]').value = new Date().toISOString().split('T')[0];
+      
+      alert('Đã ghi âm thành công! Vui lòng kiểm tra và chỉnh sửa thông tin trước khi lưu.');
+    } else {
+      alert('Không thể xử lý giọng nói. Vui lòng thử lại.');
+    }
+  } catch (error) {
+    console.error('Error processing voice input:', error);
+    alert('Lỗi xử lý giọng nói. Vui lòng thử lại.');
+  }
+}
+
+// Load expenses on page load
+loadExpenses();
+
+// Handle form submission
+document.getElementById('expense-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const expense = {
+    date: formData.get('date'),
+    category: formData.get('category'),
+    amount: parseFloat(formData.get('amount')),
+    note: formData.get('note')
+  };
+  
+  try {
+    const response = await fetch('/finance/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expense)
+    });
+    
+    if (response.ok) {
+      e.target.reset();
+      loadExpenses();
+    } else {
+      alert('Lỗi thêm chi tiêu');
+    }
+  } catch (error) {
+    console.error('Error adding expense:', error);
+    alert('Lỗi thêm chi tiêu');
+  }
+});
+
+// Handle delete
+document.getElementById('expense-list').addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('del')){
+    if (!confirm('Bạn có chắc muốn xóa chi tiêu này?')) return;
+    
+    const idx = e.target.getAttribute('data-idx');
+    try {
+      const response = await fetch('/finance/expenses/'+idx, { method:'DELETE' });
+      if (response.ok) {
+        loadExpenses();
+      } else {
+        alert('Lỗi xóa chi tiêu');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      alert('Lỗi xóa chi tiêu');
+    }
+  }
+});
+</script>
+{% endblock %}
+
+

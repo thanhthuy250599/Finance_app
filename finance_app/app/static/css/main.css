@@ -1,0 +1,257 @@
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #0b1220;
+  color: #f5f7fb;
+}
+header, footer {
+  padding: 16px;
+  background: #111827;
+}
+main { padding: 24px; }
+a { color: #93c5fd; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header .container, .site-footer .container { max-width: 1100px; margin: 0 auto; }
+.container { max-width: 1100px; margin: 0 auto; }
+.brand { font-weight: 700; }
+.nav a, .nav .linklike { margin-right: 12px; }
+.linklike { background: none; color: #93c5fd; border: none; padding: 0; cursor: pointer; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+.card { display: block; padding: 16px; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; text-align: center; }
+
+/* Forms */
+main form {
+  display: block;
+  padding: 16px;
+  margin-top: 12px;
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+}
+main form label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+main form input,
+main form button,
+main form select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0b1220;
+  color: #f5f7fb;
+}
+main form input:focus,
+main form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+main form button {
+  margin-top: 16px;
+  background: #2563eb;
+  border: none;
+  cursor: pointer;
+}
+main form button:hover {
+  background: #1d4ed8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 8px;
+  }
+  
+  main {
+    padding: 16px 8px;
+  }
+  
+  section {
+    margin: 16px auto;
+    padding: 0 8px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  /* Grid responsive */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  /* Form responsive */
+  main form {
+    padding: 12px;
+  }
+  
+  main form > div {
+    margin-bottom: 12px;
+  }
+  
+  main form input,
+  main form select,
+  main form textarea,
+  main form button {
+    width: 100% !important;
+    box-sizing: border-box;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Table responsive */
+  table {
+    font-size: 12px;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Button groups */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-group button {
+    width: 100%;
+  }
+  
+  /* Cards responsive */
+  .card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  /* Navigation responsive */
+  .nav {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .nav a {
+    padding: 8px 12px;
+    text-align: center;
+    margin-right: 0;
+  }
+  
+  /* Dashboard widgets */
+  #quick-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  /* Admin tables */
+  .admin-table {
+    font-size: 11px;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 6px 4px;
+  }
+  
+  /* Charts responsive */
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+  
+  /* Hide some elements on mobile */
+  .desktop-only {
+    display: none;
+  }
+  
+  /* Show mobile elements */
+  .mobile-only {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+  
+  h1 {
+    font-size: 20px;
+  }
+  
+  h2 {
+    font-size: 18px;
+  }
+  
+  h3 {
+    font-size: 16px;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  main form button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  /* Very small screens */
+  .xs-hidden {
+    display: none;
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  section {
+    max-width: 1200px;
+    margin: 24px auto;
+  }
+}
+

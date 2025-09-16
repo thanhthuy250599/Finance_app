@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nâng cấp gói</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+<main style="max-width: 960px; margin: 24px auto;">
+  <h1>Nâng cấp gói</h1>
+  <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+    <tr><th>Gói</th><th>Giá (VNĐ/tháng)</th><th>AI/tháng</th><th>Voice</th><th></th></tr>
+    <tr><td>Free</td><td>0</td><td>5</td><td>0</td><td></td></tr>
+    <tr><td>Pro Basic</td><td>79.000</td><td>150</td><td>0</td><td><button>Nâng cấp</button></td></tr>
+    <tr><td>Pro Plus</td><td>159.000</td><td>400</td><td>60/tháng</td><td><button>Nâng cấp</button></td></tr>
+    <tr><td>Enterprise</td><td>399.000</td><td>Unlimited</td><td>Unlimited</td><td><button>Liên hệ</button></td></tr>
+  </table>
+  <section style="margin-top:16px;">
+    <h2>Áp dụng mã khuyến mãi</h2>
+    <form id="promo-form">
+      <label>Mã</label>
+      <input name="code" />
+      <button type="submit">Áp dụng</button>
+    </form>
+    <div id="promo-out"></div>
+    <h2>Gửi yêu cầu nâng cấp</h2>
+    <form id="upgrade-form">
+      <label>Gói</label>
+      <select name="plan"><option>pro_basic</option><option>pro_plus</option><option>enterprise</option></select>
+      <label>Số tiền (VNĐ)</label>
+      <input type="number" name="amount" value="79000" />
+      <button type="submit">Gửi</button>
+    </form>
+  </section>
+  <script>
+  document.getElementById('promo-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const code = new FormData(e.target).get('code');
+    const res = await fetch('/payment/apply-promo?code='+encodeURIComponent(code), {method:'POST'});
+    const data = await res.json();
+    document.getElementById('promo-out').textContent = JSON.stringify(data);
+  });
+  document.getElementById('upgrade-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const payload = { plan: f.get('plan'), amount_vnd: Number(f.get('amount')||0), promo: (document.querySelector('#promo-form input[name="code"]').value||null) };
+    const res = await fetch('/payment/request-upgrade', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const data = await res.json();
+    alert(data.ok ? 'Đã gửi yêu cầu' : 'Lỗi');
+  });
+  </script>
+</main>
+</body>
+</html>
+
+

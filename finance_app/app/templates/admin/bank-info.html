@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Admin - Bank Info{% endblock %}
+{% block content %}
+<section>
+  <h1>Bank Info</h1>
+  <form id="bank-form">
+    <label>Tên chủ TK</label>
+    <input name="account_name" />
+    <label>Số TK</label>
+    <input name="account_number" />
+    <label>Ngân hàng</label>
+    <input name="bank" />
+    <label>QR Base64</label>
+    <textarea name="qr_base64" rows="4"></textarea>
+    <button type="submit">Lưu</button>
+  </form>
+  <pre id="out"></pre>
+</section>
+<script>
+(async ()=>{
+  const r = await fetch('/admin/bank-info');
+  const d = await r.json();
+  const f = document.getElementById('bank-form');
+  for(const k of ['account_name','account_number','bank','qr_base64']){
+    if(f[k]) f[k].value = d[k] || '';
+  }
+})();
+document.getElementById('bank-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const qs = new URLSearchParams();
+  for(const k of ['account_name','account_number','bank','qr_base64']) qs.append(k, f.get(k));
+  const r = await fetch('/admin/bank-info?'+qs.toString(), { method:'POST' });
+  document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2);
+});
+</script>
+{% endblock %}
+
+
+
+

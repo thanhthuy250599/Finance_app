@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Nhập chi tiêu bằng AI{% endblock %}
+{% block content %}
+<section style="max-width: 800px; margin: 24px auto;">
+  <h1>Nhập chi tiêu thông minh</h1>
+  
+  <!-- Banner cho Free users -->
+  <div id="ai-banner" style="display:none; padding:12px; background:#1f2937; border:1px solid #334155; border-radius:8px; margin-bottom:24px; color: white;">
+    <strong>Gói Free:</strong> Chỉ được sử dụng 5 lần/tháng. <a href="/upgrade" style="color: #60a5fa;">Nâng cấp để dùng không giới hạn</a>.
+  </div>
+  
+  <!-- Form nhập chat -->
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+    <h2 style="margin-top: 0;">Nhập chi tiêu bằng ngôn ngữ tự nhiên</h2>
+    <p style="color: #666; margin-bottom: 16px;">
+      Ví dụ: "Ăn cơm trưa 30k", "Mua áo 150k tại Zara", "Đổ xăng 200k"
+    </p>
+    <form id="chat-form" style="display: grid; gap: 12px;">
+      <div>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold;">Mô tả chi tiêu:</label>
+        <textarea name="text" placeholder="VD: Ăn cơm trưa 30k, mua trà sữa 25k, đổ xăng 200k..." required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px; resize: vertical;"></textarea>
+      </div>
+      <button type="submit" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; width: fit-content;">Phân tích và thêm chi tiêu</button>
+    </form>
+  </div>
+
+  <!-- Kết quả phân tích -->
+  <div id="chat-output" style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; min-height: 200px;">
+    <div style="text-align: center; color: #666; padding: 40px;">
+      Nhập chi tiêu ở trên để AI phân tích và thêm vào danh sách
+    </div>
+  </div>
+
+  <!-- Lịch sử nhập gần đây -->
+  <div style="margin-top: 24px;">
+    <h3>Lịch sử nhập gần đây</h3>
+    <div id="recent-inputs" style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px;">
+      <div style="text-align: center; color: #666; padding: 20px;">Đang tải...</div>
+    </div>
+  </div>
+</section>
+<script>
+// Check user plan and show banner
+(async () => {
+  try {
+    const response = await fetch('/auth/me');
+    const userData = await response.json();
+    if (userData.authenticated && userData.plan === 'free') {
+      document.getElementById('ai-banner').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Error checking user plan:', error);
+  }
+})();
+
+// Load recent inputs
+async function loadRecentInputs() {
+  try {
+    const response = await fetch('/ai/chat/history');
+    const data = await response.json();
+    const container = document.getElementById('recent-inputs');
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Chưa có lịch sử nhập</div>';
+      return;
+    }
+    
+    container.innerHTML = '';
+    data.slice(0, 10).forEach(item => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding: 12px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;';
+      div.innerHTML = `
+        <div>
+          <div style="font-weight: bold; color: #333;">${item.input}</div>
+          <div style="color: #666; font-size: 14px;">${new Date(item.timestamp).toLocaleString('vi-VN')}</div>
+        </div>
+        <div style="color: #28a745; font-weight: bold;">+${item.expenses.length} chi tiêu</div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    console.error('Error loading recent inputs:', error);
+    document.getElementById('recent-inputs').innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px;">Lỗi tải lịch sử</div>';
+  }
+}
+
+document.getElementById('chat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const text = form.get('text').trim();
+  
+  if (!text) {
+    alert('Vui lòng nhập mô tả chi tiêu');
+    return;
+  }
+  
+  const outputDiv = document.getElementById('chat-output');
+  outputDiv.innerHTML = '<div style="text-align: center; color: #007bff; padding: 20px;"><div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #007bff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div><br>AI đang phân tích...</div>';
+  
+  try {
+    const res = await fetch('/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    });
+    const data = await res.json();
+    
+    if (data.ok && data.expenses && data.expenses.length > 0) {
+      outputDiv.innerHTML = `
+        <div style="color: #28a745; font-weight: bold; margin-bottom: 16px;">
+          ✅ Đã phân tích thành công ${data.expenses.length} chi tiêu
+        </div>
+        <div style="display: grid; gap: 12px;">
+          ${data.expenses.map(expense => `
+            <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #28a745;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: bold; color: #333;">${expense.category}</div>
+                  <div style="color: #666; font-size: 14px;">${expense.note || 'Không có ghi chú'}</div>
+                </div>
+                <div style="font-weight: bold; color: #dc3545; font-size: 18px;">${expense.amount.toLocaleString('vi-VN')} VNĐ</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+          <button onclick="loadRecentInputs()" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Làm mới lịch sử</button>
+        </div>
+      `;
+      
+      // Clear form
+      e.target.reset();
+      
+      // Reload recent inputs
+      loadRecentInputs();
+    } else {
+      outputDiv.innerHTML = `
+        <div style="color: #dc3545; font-weight: bold; margin-bottom: 16px;">
+          ❌ Không thể phân tích chi tiêu
+        </div>
+        <div style="color: #666;">
+          ${data.message || 'Vui lòng thử lại với mô tả rõ ràng hơn. Ví dụ: "Ăn cơm 30k", "Mua áo 150k"'}
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error processing chat:', error);
+    outputDiv.innerHTML = `
+      <div style="color: #dc3545; font-weight: bold; margin-bottom: 16px;">
+        ❌ Lỗi xử lý
+      </div>
+      <div style="color: #666;">
+        Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.
+      </div>
+    `;
+  }
+});
+
+// Load recent inputs on page load
+loadRecentInputs();
+
+// Add CSS for loading animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
+
+
+

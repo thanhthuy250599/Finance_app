@@ -1,0 +1,18 @@
+{
+  "account_name": "Your Company LLC",
+  "account_number": "0123456789",
+  "bank": "Vietcombank",
+  "qr_base64": "",
+  "wallets": {
+    "momo": {"merchant_id": "", "callback_url": "/payment/momo/callback"},
+    "zalopay": {"app_id": "", "callback_url": "/payment/zalopay/callback"}
+  },
+  "promo_codes": {
+    "WELCOME30": {"discount_percent": 30, "description": "Giảm 30% tháng đầu tiên"}
+  }
+}
+
+
+
+
+

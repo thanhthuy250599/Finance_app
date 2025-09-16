@@ -1,0 +1,36 @@
+[
+  {
+    "username": "thuyuong",
+    "email": "uongthanhthuy99@gmail.com",
+    "password_hash": "$2b$12$jOJlMAZ9MxA0WUrmszq/xOD8GQYsShjgg.L2kJeXkRIOOwnlZFjLu",
+    "plan": "free",
+    "role": "admin",
+    "plan_usage": {
+      "ai_month": 0,
+      "ai_day": 0,
+      "voice_month": 0
+    },
+    "last_reset_day": null,
+    "last_reset_month": null,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "referral_code": null,
+    "points": 0
+  },
+  {
+    "username": "thanh thủy",
+    "email": "17133064@student.hcmute.edu.vn",
+    "password_hash": "$2b$12$zgelkIObONBrZJjoVA5pI.3.5.JmBDETZWFdGULq3fZ6OYtb6j7LO",
+    "plan": "free",
+    "plan_usage": {
+      "ai_month": 0,
+      "ai_day": 0,
+      "voice_month": 0
+    },
+    "last_reset_day": null,
+    "last_reset_month": null,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "referral_code": null,
+    "points": 0
+  }
+
+

@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+{% block title %}Mục tiêu tài chính{% endblock %}
+{% block content %}
+<style>
+  .goals-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .page-subtitle {
+    color: #4a5568;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .form-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .form-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+  }
+
+  .form-input {
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    width: fit-content;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+
+  .goals-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .goals-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+
+  .goal-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 20px;
+    padding: 32px;
+    border-left: 6px solid #667eea;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .goal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+  }
+
+  .goal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  }
+
+  .goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .goal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+  }
+
+  .goal-timeline {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .goal-amounts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .current-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2d3748;
+  }
+
+  .target-amount {
+    font-size: 1.1rem;
+    color: #4a5568;
+    font-weight: 600;
+  }
+
+  .progress-section {
+    margin-bottom: 24px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 6px;
+    transition: width 0.6s ease;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 600;
+  }
+
+  .goal-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-small {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-small:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+  }
+
+  .btn-success:hover {
+    box-shadow: 0 4px 15px rgba(56, 161, 105, 0.3);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #4a5568;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2d3748;
+  }
+
+  .empty-text {
+    font-size: 1rem;
+    color: #718096;
+  }
+
+  .quick-add-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 16px;
+    border: 2px dashed #667eea;
+  }
+
+  .quick-add-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 12px;
+  }
+
+  .quick-add-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .quick-add-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .quick-add-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+  }
+
+  .custom-input-section {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .custom-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  .custom-input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 24px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-card,
+    .goals-section {
+      padding: 24px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .goals-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .goal-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .goal-actions {
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="goals-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-target"></i>
+      Mục tiêu tài chính
+    </h1>
+    <p class="page-subtitle">Đặt mục tiêu và theo dõi tiến độ tiết kiệm để đạt được ước mơ tài chính</p>
+  </div>
+  
+  <!-- Form thêm mục tiêu -->
+  <div class="form-card">
+    <h2 class="form-title">
+      <i class="fas fa-plus-circle"></i>
+      Thêm mục tiêu mới
+    </h2>
+    <form id="goal-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Tên mục tiêu</label>
+          <input name="title" placeholder="VD: Tiết kiệm 10 triệu để mua xe" required class="form-input" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mục tiêu (VNĐ)</label>
+            <input name="target" type="number" placeholder="10000000" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Thời gian (tháng)</label>
+            <input name="months" type="number" placeholder="12" required class="form-input" />
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-plus"></i>
+        Thêm mục tiêu
+      </button>
+    </form>
+  </div>
+
+  <!-- Danh sách mục tiêu -->
+  <div class="goals-section">
+    <h2 class="section-title">
+      <i class="fas fa-list-ul"></i>
+      Mục tiêu của bạn
+    </h2>
+    <div id="goal-list" class="goals-grid"></div>
+  </div>
+</div>
+<script>
+const list = document.getElementById('goal-list');
+
+async function loadGoals(){
+  try {
+    const res = await fetch('/finance/goals');
+    const data = await res.json();
+    list.innerHTML = '';
+    
+    if (!data.items || data.items.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div class="empty-title">Chưa có mục tiêu nào</div>
+          <div class="empty-text">Hãy tạo mục tiêu tài chính đầu tiên để bắt đầu hành trình tiết kiệm</div>
+        </div>
+      `;
+      return;
+    }
+    
+    (data.items || []).forEach((g, idx) => {
+      const pct = Math.min(100, Math.round((g.saved_amount / g.target_amount) * 100)) || 0;
+      const remaining = g.target_amount - g.saved_amount;
+      const monthlyTarget = g.target_amount / g.due_months;
+      const monthsLeft = Math.ceil(remaining / monthlyTarget);
+      
+      const div = document.createElement('div');
+      div.className = 'goal-card';
+      
+      div.innerHTML = `
+        <div class="goal-header">
+          <div>
+            <div class="goal-title">${g.title}</div>
+          </div>
+          <div class="goal-timeline">
+            <i class="fas fa-calendar-alt"></i>
+            ${g.due_months} tháng
+          </div>
+        </div>
+        
+        <div class="goal-amounts">
+          <div class="current-amount">${g.saved_amount.toLocaleString('vi-VN')} VNĐ</div>
+          <div class="target-amount">/ ${g.target_amount.toLocaleString('vi-VN')} VNĐ</div>
+        </div>
+        
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${pct}%"></div>
+          </div>
+          <div class="progress-text">
+            <span>${pct}% hoàn thành</span>
+            <span>Còn ${remaining.toLocaleString('vi-VN')} VNĐ</span>
+          </div>
+        </div>
+        
+        <div class="quick-add-section">
+          <div class="quick-add-title">
+            <i class="fas fa-plus-circle"></i>
+            Thêm tiến độ nhanh
+          </div>
+          <div class="quick-add-buttons">
+            <button data-idx="${idx}" class="add-progress quick-add-btn" data-amount="100000">+100k</button>
+            <button data-idx="${idx}" class="add-progress quick-add-btn" data-amount="500000">+500k</button>
+            <button data-idx="${idx}" class="add-progress quick-add-btn" data-amount="1000000">+1M</button>
+          </div>
+          <div class="custom-input-section">
+            <input type="number" placeholder="Số tiền tùy chỉnh" data-idx="${idx}" class="custom-amount custom-input" />
+            <button data-idx="${idx}" class="add-custom btn-success btn-small">
+              <i class="fas fa-plus"></i>
+              Thêm
+            </button>
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  } catch (error) {
+    console.error('Error loading goals:', error);
+    list.innerHTML = '<div style="padding: 40px; text-align: center; color: #dc3545; background: white; border: 1px solid #dee2e6; border-radius: 8px;">Lỗi tải dữ liệu</div>';
+  }
+}
+
+document.getElementById('goal-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const payload = {
+    title: f.get('title').trim(),
+    target_amount: Number(f.get('target')),
+    due_months: Number(f.get('months')),
+    saved_amount: 0
+  };
+  
+  if (!payload.title || payload.target_amount <= 0 || payload.due_months <= 0) {
+    alert('Vui lòng nhập đầy đủ thông tin hợp lệ');
+    return;
+  }
+  
+  try {
+    const res = await fetch('/finance/goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    if (res.ok) {
+      e.target.reset();
+      loadGoals();
+    } else {
+      alert('Lỗi thêm mục tiêu');
+    }
+  } catch (error) {
+    console.error('Error adding goal:', error);
+    alert('Lỗi thêm mục tiêu');
+  }
+});
+
+list.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('add-progress')) {
+    const idx = e.target.getAttribute('data-idx');
+    const amount = e.target.getAttribute('data-amount');
+    
+    try {
+      const res = await fetch(`/finance/goals/${idx}/progress?amount=${amount}`, { method: 'POST' });
+      if (res.ok) {
+        loadGoals();
+      } else {
+        alert('Lỗi cập nhật tiến độ');
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      alert('Lỗi cập nhật tiến độ');
+    }
+  }
+  
+  if (e.target.classList.contains('add-custom')) {
+    const idx = e.target.getAttribute('data-idx');
+    const input = e.target.previousElementSibling;
+    const amount = parseFloat(input.value);
+    
+    if (!amount || amount <= 0) {
+      alert('Vui lòng nhập số tiền hợp lệ');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/finance/goals/${idx}/progress?amount=${amount}`, { method: 'POST' });
+      if (res.ok) {
+        input.value = '';
+        loadGoals();
+      } else {
+        alert('Lỗi cập nhật tiến độ');
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      alert('Lỗi cập nhật tiến độ');
+    }
+  }
+});
+
+// Load goals on page load
+loadGoals();
+</script>
+{% endblock %}
+
+
+

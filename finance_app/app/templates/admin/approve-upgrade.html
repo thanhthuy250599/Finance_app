@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Admin - Upgrade Requests{% endblock %}
+{% block content %}
+<section>
+  <h1>Upgrade Requests</h1>
+  <table id="reqs" border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse"></table>
+</section>
+<script>
+async function load(){
+  const res = await fetch('/admin/upgrade-requests');
+  const data = await res.json();
+  const tbl = document.getElementById('reqs');
+  tbl.innerHTML = '<tr><th>User</th><th>Plan</th><th>Promo</th><th>Amount</th><th>Status</th><th></th></tr>' +
+    (data.items||[]).map(r=>`<tr><td>${r.username||''}</td><td>${r.plan}</td><td>${r.promo||''}</td><td>${r.amount_vnd}</td><td>${r.status||''}</td><td>${r.status==='pending'?`<button onclick=approve('${r.username}','${r.plan}',true)>Approve</button> <button onclick=approve('${r.username}','${r.plan}',false)>Reject</button>`:''}</td></tr>`).join('');
+}
+async function approve(username, plan, ok){
+  await fetch(`/admin/approve-upgrade?username=${encodeURIComponent(username)}&plan=${encodeURIComponent(plan)}&approve=${ok?'true':'false'}`, { method:'POST' });
+  load();
+}
+load();
+</script>
+{% endblock %}
+
+

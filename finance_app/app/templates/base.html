@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Finance App{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .site-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-xl);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            position: relative;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .brand:hover {
+            transform: translateY(-1px);
+            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .brand:hover .brand-icon::before {
+            left: 100%;
+        }
+
+        .brand-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            color: white;
+            background: var(--primary-gradient);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-item.active::before {
+            opacity: 1;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            background: var(--danger-gradient);
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid white;
+            box-shadow: var(--shadow-sm);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-avatar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .user-plan {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .logout-btn {
+            background: var(--danger-gradient);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            width: 100%;
+        }
+
+        .upgrade-banner {
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .upgrade-icon {
+            font-size: 2rem;
+            color: #fbbf24;
+        }
+
+        .upgrade-content {
+            flex: 1;
+        }
+
+        .upgrade-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upgrade-text {
+            color: #a0aec0;
+            font-size: 0.95rem;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1a202c;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .site-footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 24px 0;
+            text-align: center;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+                height: 60px;
+            }
+
+            .brand {
+                font-size: 1.3rem;
+            }
+
+            .brand-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .user-section {
+                gap: 8px;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .main-content {
+                padding: 24px 16px;
+            }
+
+            .upgrade-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="site-header">
+            <div class="header-content">
+                <a href="/" class="brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <span class="brand-text">FinanceApp</span>
+                </a>
+                
+                <nav class="nav">
+                    <a href="/" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/expenses" class="nav-item">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Chi tiêu</span>
+                    </a>
+                    <a href="/analysis" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Phân tích</span>
+                    </a>
+                    <a href="/budget/edit" class="nav-item">
+                        <i class="fas fa-piggy-bank"></i>
+                        <span>Ngân sách</span>
+                    </a>
+                    <a href="/goals" class="nav-item">
+                        <i class="fas fa-target"></i>
+                        <span>Mục tiêu</span>
+                    </a>
+                    <a href="/categories" class="nav-item">
+                        <i class="fas fa-tags"></i>
+                        <span>Danh mục</span>
+                    </a>
+                    <a href="/daily-chat-input" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Chat</span>
+                    </a>
+                    <a href="/generate-plan" class="nav-item">
+                        <i class="fas fa-magic"></i>
+                        <span>Lập kế hoạch</span>
+                    </a>
+                    <a href="/upgrade" class="nav-item">
+                        <i class="fas fa-star"></i>
+                        <span>Nâng cấp</span>
+                    </a>
+                    {% if request.session.get('user') and (request.session['user'].get('role')=='admin' or request.session['user'].get('plan')=='enterprise') %}
+                    <a href="/admin" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Admin</span>
+                    </a>
+                    {% endif %}
+                </nav>
+                
+                <div class="user-section">
+                    {% if request.session.get('user') %}
+                    <button id="notifications-btn" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+                    </button>
+                    
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ request.session['user']['username'][0].upper() }}
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">{{ request.session['user']['username'] }}</div>
+                            <div class="user-plan">{{ request.session['user']['plan'] }}</div>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="/auth/logout" style="display:inline">
+                        <button class="logout-btn" type="submit">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Đăng xuất
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="/login" class="nav-item">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Đăng nhập</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+        <main class="main-content">
+            {% if not request.session.get('user') or request.session['user'].get('plan') == 'free' %}
+            <div class="upgrade-banner">
+                <div class="upgrade-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="upgrade-content">
+                    <div class="upgrade-title">Nâng cấp lên Pro để trải nghiệm đầy đủ!</div>
+                    <div class="upgrade-text">Mở khóa AI không giới hạn, export không watermark, và nhiều tính năng cao cấp khác.</div>
+                </div>
+                <a href="/upgrade" class="upgrade-btn">
+                    <i class="fas fa-rocket"></i>
+                    Nâng cấp ngay
+                </a>
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    
+    <!-- Notification Modal -->
+    <div id="notification-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; padding: 20px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">Thông báo</h3>
+                <button id="close-notifications" style="background: none; border: none; color: #93c5fd; cursor: pointer; font-size: 20px;">&times;</button>
+            </div>
+            <div id="notifications-list">
+                <div style="text-align: center; color: #666; padding: 20px;">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+    
+        <footer class="site-footer">
+            <div class="footer-content">
+                <small>&copy; 2025 Finance App - Quản lý tài chính thông minh</small>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+    // Notification system
+    let notificationCount = 0;
+    
+    // Load notifications on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadNotifications();
+        
+        // Set up notification button
+        const btn = document.getElementById('notifications-btn');
+        const modal = document.getElementById('notification-modal');
+        const closeBtn = document.getElementById('close-notifications');
+        
+        if (btn) {
+            btn.addEventListener('click', function() {
+                modal.style.display = 'flex';
+                loadNotifications();
+            });
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Check for new notifications every 30 seconds
+        setInterval(loadNotifications, 30000);
+    });
+    
+    async function loadNotifications() {
+        try {
+            const response = await fetch('/notifications');
+            const data = await response.json();
+            
+            notificationCount = data.filter(n => !n.read).length;
+            updateNotificationBadge();
+            displayNotifications(data);
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+        }
+    }
+    
+    function updateNotificationBadge() {
+        const badge = document.getElementById('notification-badge');
+        if (badge) {
+            if (notificationCount > 0) {
+                badge.textContent = notificationCount > 99 ? '99+' : notificationCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+    
+    function displayNotifications(notifications) {
+        const container = document.getElementById('notifications-list');
+        
+        if (!notifications || notifications.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Không có thông báo nào</div>';
+            return;
+        }
+        
+        container.innerHTML = notifications.map(notification => `
+            <div style="padding: 12px; border-bottom: 1px solid #1f2937; ${!notification.read ? 'background: #1e293b;' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
+                    <div style="font-weight: bold; color: #f5f7fb;">${notification.title}</div>
+                    <div style="color: #666; font-size: 12px;">${new Date(notification.timestamp).toLocaleString('vi-VN')}</div>
+                </div>
+                <div style="color: #93c5fd; font-size: 14px; margin-bottom: 8px;">${notification.message}</div>
+                ${!notification.read ? '<button onclick="markAsRead(\'' + notification.id + '\')" style="background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Đánh dấu đã đọc</button>' : ''}
+            </div>
+        `).join('');
+    }
+    
+    async function markAsRead(notificationId) {
+        try {
+            await fetch(`/notifications/${notificationId}/read`, { method: 'POST' });
+            loadNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+    </script>
+</body>
+</html>
+
+

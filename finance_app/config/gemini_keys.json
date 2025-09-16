@@ -1,0 +1,15 @@
+[
+  {
+    "key": "ENV_GEMINI_KEY_1",
+    "quota_limit": 100000,
+    "current_usage": 0,
+    "last_used": null,
+    "status": "active",
+    "error_count": 0
+  }
+]
+
+
+
+
+

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Admin - Notifications Queue{% endblock %}
+{% block content %}
+<section>
+  <h1>Notifications Queue</h1>
+  <pre id="out"></pre>
+</section>
+<script>
+(async ()=>{
+  const r = await fetch('/admin/notifications-queue');
+  document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2);
+})();
+</script>
+{% endblock %}
+
+
+
+
+

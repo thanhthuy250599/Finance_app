@@ -1,0 +1,8 @@
+{
+  "WELCOME30": {"discount_percent": 30, "description": "Giảm 30% tháng đầu tiên", "active": true},
+  "YEARLY20": {"discount_percent": 20, "description": "Tiết kiệm 20% khi trả năm", "active": true}
+}
+
+
+
+

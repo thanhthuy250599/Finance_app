@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Quản lý ngân sách{% endblock %}
+{% block content %}
+<section style="max-width: 1000px; margin: 24px auto;">
+  <h1>Quản lý ngân sách tháng</h1>
+  
+  <!-- Tabs -->
+  <div style="display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid #dee2e6;">
+    <button id="tab-edit" class="tab-btn active" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 6px 6px 0 0; cursor: pointer;">Chỉnh sửa ngân sách</button>
+    <button id="tab-history" class="tab-btn" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px 6px 0 0; cursor: pointer;">Lịch sử thay đổi</button>
+  </div>
+
+  <!-- Edit Tab -->
+  <div id="edit-tab" class="tab-content">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">Thiết lập ngân sách tháng</h2>
+      <form id="budget-form" style="display: grid; gap: 16px;">
+        <div id="budget-items" style="display: grid; gap: 12px;"></div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <button type="button" id="add-row" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">+ Thêm danh mục</button>
+          <button type="button" id="add-defaults" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Thêm mẫu</button>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; font-weight: bold;">Ghi chú phiên bản:</label>
+          <input type="text" name="version_note" placeholder="Mô tả thay đổi ngân sách..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+        </div>
+        <button type="submit" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; width: fit-content;">Lưu ngân sách</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- History Tab -->
+  <div id="history-tab" class="tab-content" style="display: none;">
+    <div style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px;">
+      <h2 style="margin-top: 0;">Lịch sử thay đổi ngân sách</h2>
+      <div id="history-list" style="max-height: 400px; overflow-y: auto;">
+        <div style="padding: 40px; text-align: center; color: #666;">Đang tải...</div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+const itemsEl = document.getElementById('budget-items');
+let budgetHistory = [];
+
+// Tab switching
+document.getElementById('tab-edit').addEventListener('click', () => {
+  document.getElementById('edit-tab').style.display = 'block';
+  document.getElementById('history-tab').style.display = 'none';
+  document.getElementById('tab-edit').style.background = '#007bff';
+  document.getElementById('tab-history').style.background = '#6c757d';
+});
+
+document.getElementById('tab-history').addEventListener('click', () => {
+  document.getElementById('edit-tab').style.display = 'none';
+  document.getElementById('history-tab').style.display = 'block';
+  document.getElementById('tab-edit').style.background = '#6c757d';
+  document.getElementById('tab-history').style.background = '#007bff';
+  loadHistory();
+});
+
+function addRow(name = '', amount = '') {
+  const div = document.createElement('div');
+  div.style.cssText = 'display: grid; grid-template-columns: 1fr 200px auto; gap: 12px; align-items: center; padding: 12px; background: white; border: 1px solid #dee2e6; border-radius: 6px;';
+  div.innerHTML = `
+    <input name="name" placeholder="Tên danh mục" value="${name}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+    <input name="amount" type="number" step="1000" placeholder="Số tiền" value="${amount}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+    <button type="button" class="remove-row" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">Xóa</button>
+  `;
+  itemsEl.appendChild(div);
+  
+  // Add remove functionality
+  div.querySelector('.remove-row').addEventListener('click', () => {
+    div.remove();
+  });
+}
+
+function addDefaultRows() {
+  const defaults = [
+    { name: 'Tiết kiệm', amount: '2000000' },
+    { name: 'Ăn uống', amount: '2500000' },
+    { name: 'Di chuyển', amount: '1000000' },
+    { name: 'Mua sắm', amount: '1500000' },
+    { name: 'Giải trí', amount: '500000' },
+    { name: 'Y tế', amount: '300000' },
+    { name: 'Học tập', amount: '800000' }
+  ];
+  
+  defaults.forEach(item => addRow(item.name, item.amount));
+}
+
+async function loadBudget() {
+  try {
+    const response = await fetch('/finance/budget');
+    const data = await response.json();
+    
+    // Clear existing items
+    itemsEl.innerHTML = '';
+    
+    if (data.items && data.items.length > 0) {
+      data.items.forEach(item => addRow(item.name, item.amount));
+    } else {
+      // Add default rows if no budget exists
+      addDefaultRows();
+    }
+  } catch (error) {
+    console.error('Error loading budget:', error);
+    addDefaultRows();
+  }
+}
+
+async function loadHistory() {
+  try {
+    const response = await fetch('/finance/budget/history');
+    const data = await response.json();
+    budgetHistory = data;
+    
+    const historyList = document.getElementById('history-list');
+    
+    if (!data || data.length === 0) {
+      historyList.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Chưa có lịch sử thay đổi</div>';
+      return;
+    }
+    
+    historyList.innerHTML = '';
+    data.forEach((version, index) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding: 16px; border-bottom: 1px solid #dee2e6; background: #f8f9fa; margin-bottom: 8px; border-radius: 6px;';
+      
+      const total = version.data.items.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const date = new Date(version.ts).toLocaleString('vi-VN');
+      
+      div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h4 style="margin: 0; color: #333;">Phiên bản ${data.length - index}</h4>
+          <span style="color: #666; font-size: 14px;">${date}</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <strong>Tổng ngân sách:</strong> ${total.toLocaleString('vi-VN')} VNĐ
+        </div>
+        ${version.note ? `<div style="margin-bottom: 8px;"><strong>Ghi chú:</strong> ${version.note}</div>` : ''}
+        <div>
+          <strong>Chi tiết:</strong>
+          <div style="margin-top: 8px; display: grid; gap: 4px;">
+            ${version.data.items.map(item => `
+              <div style="display: flex; justify-content: space-between; padding: 4px 8px; background: white; border-radius: 4px;">
+                <span>${item.name}</span>
+                <span style="font-weight: bold;">${(item.amount || 0).toLocaleString('vi-VN')} VNĐ</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      historyList.appendChild(div);
+    });
+  } catch (error) {
+    console.error('Error loading history:', error);
+    document.getElementById('history-list').innerHTML = '<div style="padding: 40px; text-align: center; color: #dc3545;">Lỗi tải lịch sử</div>';
+  }
+}
+
+// Event listeners
+document.getElementById('add-row').addEventListener('click', () => addRow());
+document.getElementById('add-defaults').addEventListener('click', addDefaultRows);
+
+document.getElementById('budget-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const versionNote = e.target.querySelector('input[name="version_note"]').value;
+  const rows = itemsEl.querySelectorAll('div');
+  const items = Array.from(rows)
+    .map(div => ({
+      name: div.querySelector('input[name="name"]').value.trim(),
+      amount: Number(div.querySelector('input[name="amount"]').value || 0)
+    }))
+    .filter(item => item.name && item.amount > 0);
+  
+  if (items.length === 0) {
+    alert('Vui lòng thêm ít nhất một danh mục ngân sách');
+    return;
+  }
+  
+  try {
+    const res = await fetch('/finance/budget', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, version_note: versionNote })
+    });
+    const data = await res.json();
+    
+    if (data.ok) {
+      alert('Đã lưu ngân sách thành công!');
+      e.target.querySelector('input[name="version_note"]').value = '';
+      loadBudget();
+    } else {
+      alert('Lỗi lưu ngân sách');
+    }
+  } catch (error) {
+    console.error('Error saving budget:', error);
+    alert('Lỗi lưu ngân sách');
+  }
+});
+
+// Load budget on page load
+loadBudget();
+</script>
+{% endblock %}
+
+
+

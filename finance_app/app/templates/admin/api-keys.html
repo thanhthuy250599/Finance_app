@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Admin - API Keys{% endblock %}
+{% block content %}
+<section>
+  <h1>API Keys</h1>
+  <form id="add-form" style="margin:8px 0;">
+    <input name="key" placeholder="New API Key" style="width:60%" required />
+    <input name="quota" type="number" value="100000" style="width:20%" />
+    <button type="submit">Add Key</button>
+  </form>
+  <table id="keys" border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse"></table>
+</section>
+<script>
+async function load(){
+  const res = await fetch('/admin/api-keys');
+  const data = await res.json();
+  const tbl = document.getElementById('keys');
+  tbl.innerHTML = '<tr><th>Key</th><th>Status</th><th>Usage</th><th></th></tr>' +
+    (data.keys||[]).map(k=>`<tr><td>${k.key}</td><td>${k.status}</td><td>${k.current_usage}/${k.quota_limit}</td><td><button data-key="${k.key}" class="del">Delete</button></td></tr>`).join('');
+}
+load();
+document.getElementById('add-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  await fetch(`/admin/api-keys/add?key=${encodeURIComponent(f.get('key'))}&quota_limit=${encodeURIComponent(f.get('quota'))}`, { method:'POST' });
+  e.target.reset();
+  load();
+});
+document.getElementById('keys').addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('del')){
+    const key = e.target.getAttribute('data-key');
+    await fetch('/admin/api-keys/'+encodeURIComponent(key), { method:'DELETE' });
+    load();
+  }
+});
+</script>
+{% endblock %}
+
+
+

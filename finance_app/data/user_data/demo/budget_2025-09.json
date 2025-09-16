@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "Tiết kiệm",
+      "amount": 2000000.0
+    },
+    {
+      "name": "Ăn uống",
+      "amount": 2500000.0
+    },
+    {
+      "name": "Di chuyển",
+      "amount": 1000000.0
+    },
+    {
+      "name": "Mua sắm",
+      "amount": 1500000.0
+    },
+    {
+      "name": "Giải trí",
+      "amount": 500000.0
+    },
+    {
+      "name": "Y tế",
+      "amount": 300000.0
+    },
+    {
+      "name": "Học tập",
+      "amount": 800000.0
+    }
+  ]
+}

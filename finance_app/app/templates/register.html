@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký{% endblock %}
+{% block content %}
+<section style="max-width: 420px; margin: 40px auto;">
+  <h1 style="text-align:center">Đăng ký</h1>
+  <form method="post" action="/auth/register-form">
+    <label>Tên đăng nhập</label>
+    <input type="text" name="username" required />
+    <label>Email</label>
+    <input type="email" name="email" required />
+    <label>Mật khẩu</label>
+    <input type="password" name="password" required />
+    <label>Mã giới thiệu (tuỳ chọn)</label>
+    <input type="text" name="referral_code" />
+    <button type="submit">Tạo tài khoản</button>
+  </form>
+  <p><a href="/login">Đã có tài khoản? Đăng nhập</a></p>
+</section>
+{% endblock %}
+
+

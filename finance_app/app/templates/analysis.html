@@ -1,0 +1,906 @@
+{% extends "base.html" %}
+{% block title %}Phân tích tài chính{% endblock %}
+{% block content %}
+<style>
+  .analysis-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .analysis-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+  }
+
+  .analysis-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .analysis-header p {
+    font-size: 1.1rem;
+    color: #4a5568;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .controls-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .control-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .control-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .control-btn:hover::before {
+    left: 100%;
+  }
+
+  .control-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+
+  .control-btn.active {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+  }
+
+  .export-btn {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+  }
+
+  .export-btn:hover {
+    box-shadow: 0 12px 35px rgba(46, 204, 113, 0.4);
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .summary-cards.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .summary-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+  }
+
+  .summary-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  }
+
+  .summary-card .value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .summary-card .label {
+    color: #666;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  .chart-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+  }
+
+  .chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  }
+
+  .chart-card h3 {
+    margin: 0 0 24px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    text-align: center;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 350px;
+  }
+
+  .analysis-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    min-height: 300px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .analysis-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  }
+
+  .loading-skeleton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+  }
+
+  .skeleton-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .pulse {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    }
+  }
+
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 4px solid #667eea;
+  }
+
+  .category-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .category-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1rem;
+  }
+
+  .category-amount {
+    font-weight: 700;
+    color: #e74c3c;
+    font-size: 1.2rem;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+
+  .comparison-card {
+    padding: 24px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .comparison-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  }
+
+  .comparison-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 8px;
+  }
+
+  .comparison-label {
+    color: #666;
+    font-weight: 500;
+  }
+
+  .change-indicator {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .change-positive {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #d32f2f;
+  }
+
+  .change-negative {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #2e7d32;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 768px) {
+    .analysis-container {
+      padding: 16px;
+    }
+
+    .analysis-header h1 {
+      font-size: 2rem;
+    }
+
+    .analysis-header p {
+      font-size: 1rem;
+    }
+
+    .charts-container {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .chart-card {
+      padding: 20px;
+    }
+
+    .chart-container {
+      height: 300px;
+    }
+
+    .comparison-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .controls-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-btn {
+      width: 100%;
+      max-width: 300px;
+      padding: 14px 28px;
+      font-size: 0.9rem;
+    }
+
+    .summary-cards {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .summary-card {
+      padding: 24px;
+    }
+
+    .summary-card .value {
+      font-size: 2rem;
+    }
+
+    .analysis-content {
+      padding: 24px;
+    }
+
+    .category-item {
+      padding: 12px 16px;
+    }
+
+    .category-name {
+      font-size: 1rem;
+    }
+
+    .category-amount {
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .analysis-container {
+      padding: 12px;
+    }
+
+    .analysis-header h1 {
+      font-size: 1.8rem;
+    }
+
+    .chart-card {
+      padding: 16px;
+    }
+
+    .chart-container {
+      height: 250px;
+    }
+
+    .summary-card {
+      padding: 20px;
+    }
+
+    .summary-card .value {
+      font-size: 1.8rem;
+    }
+
+    .analysis-content {
+      padding: 20px;
+    }
+
+    .control-btn {
+      padding: 12px 24px;
+      font-size: 0.85rem;
+    }
+  }
+</style>
+
+<div class="analysis-container">
+  <div class="analysis-header">
+    <h1>
+      <i class="fas fa-chart-line"></i>
+      Phân tích tài chính
+    </h1>
+    <p>Khám phá insights từ dữ liệu chi tiêu của bạn với các biểu đồ và thống kê chi tiết</p>
+  </div>
+  
+  <!-- Controls -->
+  <div class="controls-container">
+    <button id="btn-summary" class="control-btn active">
+      <i class="fas fa-chart-pie"></i>
+      Tổng quan tháng này
+    </button>
+    <button id="btn-compare" class="control-btn">
+      <i class="fas fa-chart-bar"></i>
+      So sánh với tháng trước
+    </button>
+    <button onclick="exportData('csv')" class="control-btn export-btn">
+      <i class="fas fa-file-csv"></i>
+      Xuất CSV
+    </button>
+    <button onclick="exportData('pdf')" class="control-btn export-btn">
+      <i class="fas fa-file-pdf"></i>
+      Xuất PDF
+    </button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div id="summary-cards" class="summary-cards"></div>
+
+  <!-- Charts Container -->
+  <div class="charts-container">
+    <div class="chart-card">
+      <h3>
+        <i class="fas fa-chart-pie"></i>
+        Chi tiêu theo danh mục
+      </h3>
+      <div class="chart-container">
+        <canvas id="category-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>
+        <i class="fas fa-chart-line"></i>
+        Xu hướng chi tiêu
+      </h3>
+      <div class="chart-container">
+        <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Analysis -->
+  <div id="analysis-content" class="analysis-content">
+    <div class="empty-state">
+      <div class="empty-state-icon">🎯</div>
+      <h3>Chọn phân tích để bắt đầu</h3>
+      <p>Nhấn vào các nút bên trên để xem insights chi tiết</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let categoryChart = null;
+let trendChart = null;
+
+async function exportData(format) {
+  try {
+    const response = await fetch(`/finance/expenses/export?format=${format}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `expenses_analysis_${new Date().toISOString().slice(0,7)}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } else {
+      alert('Lỗi xuất file');
+    }
+  } catch (error) {
+    console.error('Export error:', error);
+    alert('Lỗi xuất file');
+  }
+}
+
+async function loadSummary() {
+  try {
+    // Show loading state
+    showLoading();
+    
+    const response = await fetch('/finance/expenses/summary');
+    const data = await response.json();
+    
+    // Show summary cards with animation
+    const cardsContainer = document.getElementById('summary-cards');
+    cardsContainer.innerHTML = `
+      <div class="summary-card fade-in">
+        <div class="value">${data.total.toLocaleString('vi-VN')} VNĐ</div>
+        <div class="label">Tổng chi tiêu tháng</div>
+      </div>
+      <div class="summary-card fade-in" style="animation-delay: 0.2s;">
+        <div class="value">${data.count}</div>
+        <div class="label">Số giao dịch</div>
+      </div>
+      <div class="summary-card fade-in" style="animation-delay: 0.4s;">
+        <div class="value">${Object.keys(data.by_category).length}</div>
+        <div class="label">Danh mục</div>
+      </div>
+    `;
+    
+    // Trigger animation
+    setTimeout(() => {
+      cardsContainer.classList.add('show');
+    }, 100);
+    
+    // Create category chart with enhanced styling
+    const categoryCtx = document.getElementById('category-chart').getContext('2d');
+    if (categoryChart) categoryChart.destroy();
+    
+    const categories = Object.keys(data.by_category);
+    const amounts = Object.values(data.by_category);
+    const colors = [
+      '#667eea', '#764ba2', '#f093fb', '#f5576c', 
+      '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+      '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'
+    ];
+    
+    categoryChart = new Chart(categoryCtx, {
+      type: 'doughnut',
+      data: {
+        labels: categories,
+        datasets: [{
+          data: amounts,
+          backgroundColor: colors.slice(0, categories.length),
+          borderWidth: 3,
+          borderColor: '#fff',
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+          duration: 1000
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              font: {
+                size: 14,
+                weight: '600'
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: '#667eea',
+            borderWidth: 2,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                return `${context.label}: ${context.parsed.toLocaleString('vi-VN')} VNĐ (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Show detailed analysis with enhanced styling
+    const analysisContent = document.getElementById('analysis-content');
+    analysisContent.innerHTML = `
+      <div class="fade-in">
+        <h3 style="text-align: center; margin-bottom: 32px; color: #2c3e50; font-size: 2rem;">
+          📊 Tổng quan chi tiêu tháng ${data.month}
+        </h3>
+        <div style="margin: 24px 0;">
+          <h4 style="color: #34495e; margin-bottom: 20px; font-size: 1.3rem;">
+            💰 Chi tiêu theo danh mục:
+          </h4>
+          <div style="display: grid; gap: 12px;">
+            ${Object.entries(data.by_category)
+              .sort((a, b) => b[1] - a[1])
+              .map(([cat, amount], index) => `
+                <div class="category-item" style="animation-delay: ${index * 0.1}s;">
+                  <span class="category-name">${cat}</span>
+                  <span class="category-amount">${amount.toLocaleString('vi-VN')} VNĐ</span>
+                </div>
+              `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.error('Error loading summary:', error);
+    document.getElementById('analysis-content').innerHTML = '<div style="color: #dc3545; text-align: center; padding: 40px;">Lỗi tải dữ liệu</div>';
+  }
+}
+
+async function loadCompare() {
+  try {
+    // Show loading state
+    showLoading();
+    
+    const response = await fetch('/finance/expenses/compare-month');
+    const data = await response.json();
+    
+    // Show summary cards with animation
+    const cardsContainer = document.getElementById('summary-cards');
+    cardsContainer.innerHTML = `
+      <div class="summary-card fade-in">
+        <div class="value">${data.current.total.toLocaleString('vi-VN')} VNĐ</div>
+        <div class="label">Tháng ${data.current.month}</div>
+      </div>
+      <div class="summary-card fade-in" style="animation-delay: 0.2s;">
+        <div class="value">${data.previous.total.toLocaleString('vi-VN')} VNĐ</div>
+        <div class="label">Tháng ${data.previous.month}</div>
+      </div>
+      <div class="summary-card fade-in ${data.delta >= 0 ? 'pulse' : ''}" style="animation-delay: 0.4s; background: ${data.delta >= 0 ? 'linear-gradient(135deg, #ffebee, #ffcdd2)' : 'linear-gradient(135deg, #e8f5e8, #c8e6c9)'};">
+        <div class="value" style="color: ${data.delta >= 0 ? '#d32f2f' : '#2e7d32'};">
+          ${data.delta >= 0 ? '+' : ''}${data.delta.toLocaleString('vi-VN')} VNĐ
+        </div>
+        <div class="label">Thay đổi</div>
+        ${data.percent !== null ? `<div style="font-size: 1rem; color: #666; margin-top: 8px;">${data.percent.toFixed(1)}%</div>` : ''}
+      </div>
+    `;
+    
+    // Trigger animation
+    setTimeout(() => {
+      cardsContainer.classList.add('show');
+    }, 100);
+    
+    // Create trend chart with enhanced styling
+    const trendCtx = document.getElementById('trend-chart').getContext('2d');
+    if (trendChart) trendChart.destroy();
+    
+    trendChart = new Chart(trendCtx, {
+      type: 'bar',
+      data: {
+        labels: [data.previous.month, data.current.month],
+        datasets: [{
+          label: 'Tổng chi tiêu (VNĐ)',
+          data: [data.previous.total, data.current.total],
+          backgroundColor: [
+            'rgba(102, 126, 234, 0.8)',
+            data.delta >= 0 ? 'rgba(255, 107, 107, 0.8)' : 'rgba(67, 233, 123, 0.8)'
+          ],
+          borderColor: [
+            '#667eea',
+            data.delta >= 0 ? '#ff6b6b' : '#43e97b'
+          ],
+          borderWidth: 3,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1500,
+          easing: 'easeInOutQuart'
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0,0,0,0.1)',
+              drawBorder: false
+            },
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString('vi-VN') + ' VNĐ';
+              },
+              font: {
+                size: 12,
+                weight: '600'
+              },
+              color: '#666'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: {
+                size: 14,
+                weight: '600'
+              },
+              color: '#2c3e50'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: data.delta >= 0 ? '#ff6b6b' : '#43e97b',
+            borderWidth: 2,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.parsed.y.toLocaleString('vi-VN')} VNĐ`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Show detailed comparison with enhanced styling
+    const analysisContent = document.getElementById('analysis-content');
+    const changeText = data.delta >= 0 ? 'tăng' : 'giảm';
+    const changeColor = data.delta >= 0 ? '#d32f2f' : '#2e7d32';
+    const changeIcon = data.delta >= 0 ? '📈' : '📉';
+    
+    analysisContent.innerHTML = `
+      <div class="fade-in">
+        <h3 style="text-align: center; margin-bottom: 32px; color: #2c3e50; font-size: 2rem;">
+          ${changeIcon} So sánh chi tiêu
+        </h3>
+        <div class="comparison-grid">
+          <div class="comparison-card">
+            <h4 style="color: #34495e; margin-bottom: 16px; font-size: 1.2rem;">Tháng ${data.previous.month}</h4>
+            <div class="comparison-value">${data.previous.total.toLocaleString('vi-VN')} VNĐ</div>
+            <div class="comparison-label">${data.previous.count} giao dịch</div>
+          </div>
+          <div class="comparison-card">
+            <h4 style="color: #34495e; margin-bottom: 16px; font-size: 1.2rem;">Tháng ${data.current.month}</h4>
+            <div class="comparison-value">${data.current.total.toLocaleString('vi-VN')} VNĐ</div>
+            <div class="comparison-label">${data.current.count} giao dịch</div>
+          </div>
+        </div>
+        <div class="change-indicator ${data.delta >= 0 ? 'change-positive' : 'change-negative'}">
+          <div style="font-size: 1.5rem; margin-bottom: 8px;">
+            ${changeIcon} Chi tiêu ${changeText}
+          </div>
+          <div style="font-size: 1.8rem; font-weight: 800;">
+            ${Math.abs(data.delta).toLocaleString('vi-VN')} VNĐ
+          </div>
+          ${data.percent !== null ? `<div style="font-size: 1.2rem; margin-top: 8px; opacity: 0.8;">(${Math.abs(data.percent).toFixed(1)}%)</div>` : ''}
+        </div>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.error('Error loading comparison:', error);
+    document.getElementById('analysis-content').innerHTML = '<div style="color: #dc3545; text-align: center; padding: 40px;">Lỗi tải dữ liệu</div>';
+  }
+}
+
+// Loading functions
+function showLoading() {
+  const analysisContent = document.getElementById('analysis-content');
+  analysisContent.innerHTML = `
+    <div class="loading-skeleton">
+      <div class="skeleton-spinner"></div>
+    </div>
+  `;
+}
+
+function updateActiveButton(activeId) {
+  // Remove active class from all buttons
+  document.querySelectorAll('.control-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Add active class to clicked button
+  document.getElementById(activeId).classList.add('active');
+}
+
+// Event listeners
+document.getElementById('btn-summary').addEventListener('click', () => {
+  updateActiveButton('btn-summary');
+  loadSummary();
+});
+
+document.getElementById('btn-compare').addEventListener('click', () => {
+  updateActiveButton('btn-compare');
+  loadCompare();
+});
+
+// Load summary by default
+loadSummary();
+</script>
+{% endblock %}
+
+

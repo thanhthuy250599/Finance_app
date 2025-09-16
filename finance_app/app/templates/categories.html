@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+{% block title %}Quản lý danh mục{% endblock %}
+{% block content %}
+<style>
+  .categories-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .page-subtitle {
+    color: #4a5568;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .form-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .form-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+
+  .categories-list {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .list-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+  }
+
+  .category-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .category-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .category-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .category-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+  }
+
+  .btn-delete {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-delete:hover {
+    background: #c53030;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(197, 48, 48, 0.3);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #4a5568;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2d3748;
+  }
+
+  .empty-text {
+    font-size: 1rem;
+    color: #718096;
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #4a5568;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 24px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .form-card,
+    .categories-list {
+      padding: 24px;
+    }
+
+    .category-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .category-info {
+      width: 100%;
+    }
+
+    .btn-delete {
+      align-self: flex-end;
+    }
+  }
+</style>
+
+<div class="categories-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-tags"></i>
+      Quản lý danh mục
+    </h1>
+    <p class="page-subtitle">Tạo và quản lý các danh mục chi tiêu để phân loại tài chính tốt hơn</p>
+  </div>
+  
+  <!-- Form thêm danh mục -->
+  <div class="form-card">
+    <h2 class="form-title">
+      <i class="fas fa-plus-circle"></i>
+      Thêm danh mục mới
+    </h2>
+    <form id="cat-form">
+      <div class="form-group">
+        <label class="form-label">Tên danh mục</label>
+        <input type="text" name="name" placeholder="Nhập tên danh mục" required class="form-input" />
+      </div>
+      <button type="submit" class="btn-primary">
+        <i class="fas fa-plus"></i>
+        Thêm danh mục
+      </button>
+    </form>
+  </div>
+
+  <!-- Danh sách danh mục -->
+  <div class="categories-list">
+    <h2 class="list-title">
+      <i class="fas fa-list"></i>
+      Danh sách danh mục
+    </h2>
+    <div id="cat-list">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="empty-title">Đang tải...</div>
+        <div class="empty-text">Vui lòng chờ trong giây lát</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const loadCats = async () => {
+  try {
+    const res = await fetch('/finance/categories');
+    const data = await res.json();
+    const list = document.getElementById('cat-list');
+    
+    if (!data.items || data.items.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-tags"></i>
+          </div>
+          <div class="empty-title">Chưa có danh mục nào</div>
+          <div class="empty-text">Hãy thêm danh mục đầu tiên để bắt đầu phân loại chi tiêu</div>
+        </div>
+      `;
+      return;
+    }
+    
+    list.innerHTML = '';
+    
+    // Category icons mapping
+    const categoryIcons = {
+      'Ăn uống': '🍽️',
+      'Di chuyển': '🚗',
+      'Mua sắm': '🛍️',
+      'Giải trí': '🎮',
+      'Y tế': '🏥',
+      'Học tập': '📚',
+      'Khác': '📦'
+    };
+    
+    data.items.forEach((c, index) => {
+      const div = document.createElement('div');
+      div.className = 'category-item';
+      
+      const icon = categoryIcons[c.name] || c.name.charAt(0).toUpperCase();
+      
+      div.innerHTML = `
+        <div class="category-info">
+          <div class="category-icon">${icon}</div>
+          <div class="category-name">${c.name}</div>
+        </div>
+        <button data-name="${c.name}" class="del btn-delete">
+          <i class="fas fa-trash"></i>
+          Xóa
+        </button>
+      `;
+      list.appendChild(div);
+    });
+    
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.del').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const categoryName = e.target.closest('.del').dataset.name;
+        if (confirm(`Bạn có chắc muốn xóa danh mục "${categoryName}"?`)) {
+          try {
+            const response = await fetch(`/finance/categories?name=${encodeURIComponent(categoryName)}`, {
+              method: 'DELETE'
+            });
+            
+            if (response.ok) {
+              loadCats(); // Reload categories
+            } else {
+              alert('Lỗi xóa danh mục');
+            }
+          } catch (error) {
+            console.error('Error deleting category:', error);
+            alert('Lỗi xóa danh mục');
+          }
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error loading categories:', error);
+    document.getElementById('cat-list').innerHTML = '<div style="padding: 40px; text-align: center; color: #dc3545;">Lỗi tải dữ liệu</div>';
+  }
+}
+
+document.getElementById('cat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const name = form.get('name').trim();
+  
+  if (!name) {
+    alert('Vui lòng nhập tên danh mục');
+    return;
+  }
+  
+  try {
+    const res = await fetch('/finance/categories', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ name: name }) 
+    });
+    const result = await res.json();
+    
+    if (result.ok) {
+      e.target.reset();
+      loadCats();
+    } else if (result.message === 'exists') {
+      alert('Danh mục này đã tồn tại');
+    } else {
+      alert('Lỗi thêm danh mục');
+    }
+  } catch (error) {
+    console.error('Error adding category:', error);
+    alert('Lỗi thêm danh mục');
+  }
+});
+
+document.getElementById('cat-list').addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('del')){
+    const name = e.target.getAttribute('data-name');
+    if (!confirm(`Bạn có chắc muốn xóa danh mục "${name}"?`)) return;
+    
+    try {
+      const res = await fetch('/finance/categories/'+encodeURIComponent(name), { method: 'DELETE' });
+      if (res.ok) {
+        loadCats();
+      } else {
+        alert('Lỗi xóa danh mục');
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Lỗi xóa danh mục');
+    }
+  }
+});
+
+// Load categories on page load
+loadCats();
+
+// Handle form submission
+document.getElementById('cat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const categoryName = formData.get('name').trim();
+  
+  if (!categoryName) {
+    alert('Vui lòng nhập tên danh mục');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/finance/categories', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: categoryName })
+    });
+    
+    if (response.ok) {
+      e.target.reset(); // Clear form
+      loadCats(); // Reload categories
+    } else {
+      const data = await response.json();
+      alert(data.error || 'Lỗi thêm danh mục');
+    }
+  } catch (error) {
+    console.error('Error adding category:', error);
+    alert('Lỗi thêm danh mục');
+  }
+});
+</script>
+{% endblock %}
+
+

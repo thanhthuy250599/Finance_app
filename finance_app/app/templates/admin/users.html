@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Admin - Quản lý người dùng{% endblock %}
+{% block content %}
+<section style="max-width: 1200px; margin: 24px auto;">
+  <h1>Quản lý người dùng</h1>
+  
+  <!-- Filters -->
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+      <div>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold;">Tìm kiếm:</label>
+        <input type="text" id="search-input" placeholder="Username hoặc email..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold;">Gói:</label>
+        <select id="plan-filter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          <option value="">Tất cả</option>
+          <option value="free">Free</option>
+          <option value="pro_basic">Pro Basic</option>
+          <option value="pro_plus">Pro Plus</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; font-weight: bold;">Sắp xếp:</label>
+        <select id="sort-filter" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          <option value="username">Username</option>
+          <option value="plan">Gói</option>
+          <option value="points">Điểm</option>
+          <option value="last_login">Đăng nhập cuối</option>
+        </select>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button onclick="loadUsers()" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Làm mới</button>
+      <button onclick="exportUsers()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Xuất CSV</button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div id="stats-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;"></div>
+
+  <!-- Users Table -->
+  <div style="background: white; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+    <div style="padding: 20px; border-bottom: 1px solid #dee2e6;">
+      <h3 style="margin: 0;">Danh sách người dùng</h3>
+    </div>
+    <div style="overflow-x: auto;">
+      <table id="users-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f8f9fa;">
+          <tr>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Username</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Email</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Gói</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Điểm</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Đăng ký</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr>
+            <td colspan="6" style="padding: 40px; text-align: center; color: #666;">Đang tải...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+let allUsers = [];
+
+async function loadUsers() {
+  try {
+    const res = await fetch('/admin/users');
+    const data = await res.json();
+    allUsers = data.users || [];
+    
+    // Update stats
+    updateStats(allUsers);
+    
+    // Filter and display users
+    filterAndDisplayUsers();
+  } catch (error) {
+    console.error('Error loading users:', error);
+    document.getElementById('users-tbody').innerHTML = '<tr><td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">Lỗi tải dữ liệu</td></tr>';
+  }
+}
+
+function updateStats(users) {
+  const stats = {
+    total: users.length,
+    free: users.filter(u => u.plan === 'free').length,
+    pro: users.filter(u => u.plan === 'pro_basic' || u.plan === 'pro_plus').length,
+    enterprise: users.filter(u => u.plan === 'enterprise').length,
+    totalPoints: users.reduce((sum, u) => sum + (u.points || 0), 0)
+  };
+  
+  document.getElementById('stats-cards').innerHTML = `
+    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center;">
+      <div style="font-size: 28px; font-weight: bold; color: #1976d2;">${stats.total}</div>
+      <div style="color: #666;">Tổng người dùng</div>
+    </div>
+    <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; text-align: center;">
+      <div style="font-size: 28px; font-weight: bold; color: #7b1fa2;">${stats.free}</div>
+      <div style="color: #666;">Gói Free</div>
+    </div>
+    <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; text-align: center;">
+      <div style="font-size: 28px; font-weight: bold; color: #2e7d32;">${stats.pro}</div>
+      <div style="color: #666;">Gói Pro</div>
+    </div>
+    <div style="background: #fff3e0; padding: 20px; border-radius: 8px; text-align: center;">
+      <div style="font-size: 28px; font-weight: bold; color: #f57c00;">${stats.enterprise}</div>
+      <div style="color: #666;">Enterprise</div>
+    </div>
+    <div style="background: #fce4ec; padding: 20px; border-radius: 8px; text-align: center;">
+      <div style="font-size: 28px; font-weight: bold; color: #c2185b;">${stats.totalPoints.toLocaleString('vi-VN')}</div>
+      <div style="color: #666;">Tổng điểm</div>
+    </div>
+  `;
+}
+
+function filterAndDisplayUsers() {
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+  const planFilter = document.getElementById('plan-filter').value;
+  const sortBy = document.getElementById('sort-filter').value;
+  
+  let filtered = allUsers.filter(user => {
+    const matchesSearch = !searchTerm || 
+      user.username.toLowerCase().includes(searchTerm) || 
+      user.email.toLowerCase().includes(searchTerm);
+    const matchesPlan = !planFilter || user.plan === planFilter;
+    return matchesSearch && matchesPlan;
+  });
+  
+  // Sort
+  filtered.sort((a, b) => {
+    switch(sortBy) {
+      case 'username': return a.username.localeCompare(b.username);
+      case 'plan': return a.plan.localeCompare(b.plan);
+      case 'points': return (b.points || 0) - (a.points || 0);
+      case 'last_login': return new Date(b.last_login || 0) - new Date(a.last_login || 0);
+      default: return 0;
+    }
+  });
+  
+  displayUsers(filtered);
+}
+
+function displayUsers(users) {
+  const tbody = document.getElementById('users-tbody');
+  
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding: 40px; text-align: center; color: #666;">Không tìm thấy người dùng</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = users.map(user => {
+    const planColors = {
+      'free': '#6c757d',
+      'pro_basic': '#007bff',
+      'pro_plus': '#28a745',
+      'enterprise': '#dc3545'
+    };
+    
+    const planNames = {
+      'free': 'Free',
+      'pro_basic': 'Pro Basic',
+      'pro_plus': 'Pro Plus',
+      'enterprise': 'Enterprise'
+    };
+    
+    return `
+      <tr style="border-bottom: 1px solid #dee2e6;">
+        <td style="padding: 12px;">
+          <div style="font-weight: bold; color: #333;">${user.username}</div>
+          <div style="color: #666; font-size: 14px;">ID: ${user.username}</div>
+        </td>
+        <td style="padding: 12px;">${user.email}</td>
+        <td style="padding: 12px;">
+          <span style="background: ${planColors[user.plan] || '#6c757d'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+            ${planNames[user.plan] || 'Free'}
+          </span>
+        </td>
+        <td style="padding: 12px; font-weight: bold; color: #007bff;">${(user.points || 0).toLocaleString('vi-VN')}</td>
+        <td style="padding: 12px; color: #666;">${user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN') : 'N/A'}</td>
+        <td style="padding: 12px;">
+          <div style="display: flex; gap: 4px;">
+            <button onclick="viewUser('${user.username}')" style="background: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Xem</button>
+            <button onclick="editUser('${user.username}')" style="background: #ffc107; color: black; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Sửa</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function viewUser(username) {
+  alert(`Xem thông tin chi tiết của ${username}`);
+}
+
+function editUser(username) {
+  alert(`Chỉnh sửa thông tin của ${username}`);
+}
+
+function exportUsers() {
+  const csvContent = [
+    ['Username', 'Email', 'Plan', 'Points', 'Created At'],
+    ...allUsers.map(user => [
+      user.username,
+      user.email,
+      user.plan,
+      user.points || 0,
+      user.created_at || ''
+    ])
+  ].map(row => row.join(',')).join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `users_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+// Event listeners
+document.getElementById('search-input').addEventListener('input', filterAndDisplayUsers);
+document.getElementById('plan-filter').addEventListener('change', filterAndDisplayUsers);
+document.getElementById('sort-filter').addEventListener('change', filterAndDisplayUsers);
+
+// Load users on page load
+loadUsers();
+</script>
+{% endblock %}
+
+
+
